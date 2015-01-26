@@ -21,19 +21,23 @@ app.use(expressSession({
 app.use(passport.initialize());
 app.use(passport.session());
 
-passport.use(new passportLocal.Strategy(
-    function(username, password, done){
-        //i'm just hard coding authentification. 
-    //In a real world scenario, you would talk to a db
+function verifyCredentials (username, password, done) {
+    //i'm just hard coding authentification. 
+//In a real world scenario, you would talk to a db
 
-    if ( username === password) {
+    if ( username === password ) {
         done(null, {id : username, name : username });
     }else {
         done(null,null);
     }
+}
 
-    }));
+//passportlocal
+passport.use(new passportLocal.Strategy(verifyCredentials));
 
+//passporthttp
+passport.use(new passportHttp.BasicStrategy(verifyCredentials));
+    
 passport.serializeUser( function(user, done){
     done(null, user.id);
 });
@@ -46,7 +50,7 @@ function ensureAutenticated(req, res, next) {
     if (req.isAuthenticated()) {
         next();
     } else {
-        res.redirect('/login');
+        res.send(403);
     }
 }
 
@@ -70,6 +74,9 @@ app.get('/logout',function (req, res) {
 
    res.redirect('/');
 });
+
+//every request in api, authenticates with basic strategy
+app.use('/api',passport.authenticate('basic'));
 
 app.get('/api/data', ensureAutenticated, function(req, res) {
    res.json([
