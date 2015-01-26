@@ -1,6 +1,7 @@
 var express = require('express');
 var passport = require('passport');
 var passportLocal = require('passport-local');
+var passportHttp = require('passport-http');
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
 var expressSession = require('express-session');
@@ -41,6 +42,14 @@ passport.deserializeUser( function(id, done) {
     done(null, {id : id, name : id});
 });
 
+function ensureAutenticated(req, res, next) {
+    if (req.isAuthenticated()) {
+        next();
+    } else {
+        res.redirect('/login');
+    }
+}
+
 app.get('/',function(req, res) {
     res.render('index',{
         isAuthenticated : req.isAuthenticated(),
@@ -60,6 +69,15 @@ app.get('/logout',function (req, res) {
    req.logout(); 
 
    res.redirect('/');
+});
+
+app.get('/api/data', ensureAutenticated, function(req, res) {
+   res.json([
+    {value : 'foo'},
+    {value : 'bar'},
+    {value : 'olivier'},
+    {value : 'diokey'}
+   ]);
 });
 
 var port = process.env.PORT || 1337;
