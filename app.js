@@ -76,7 +76,8 @@ app.get('/logout',function (req, res) {
 });
 
 //every request in api, authenticates with basic strategy
-app.use('/api',passport.authenticate('basic'));
+app.use('/api',
+        passport.authenticate('basic',{session : false}));
 
 app.get('/api/data', ensureAutenticated, function(req, res) {
    res.json([
