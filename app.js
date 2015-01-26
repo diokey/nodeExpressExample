@@ -1,18 +1,65 @@
 var express = require('express');
+var passport = require('passport');
+var passportLocal = require('passport-local');
+var bodyParser = require('body-parser');
+var cookieParser = require('cookie-parser');
+var expressSession = require('express-session');
 
 var app = express();
 
 app.set('view engine','ejs');
 
+app.use(bodyParser.urlencoded({ extended : false }));
+app.use(cookieParser());
+app.use(expressSession({
+    secret : process.env.SESSION || 'secret',
+    resave : false,
+    saveUninitialized : false
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+passport.use(new passportLocal.Strategy(
+    function(username, password, done){
+        //i'm just hard coding authentification. 
+    //In a real world scenario, you would talk to a db
+
+    if ( username === password) {
+        done(null, {id : username, name : username });
+    }else {
+        done(null,null);
+    }
+
+    }));
+
+passport.serializeUser( function(user, done){
+    done(null, user.id);
+});
+
+passport.deserializeUser( function(id, done) {
+    done(null, {id : id, name : id});
+});
+
 app.get('/',function(req, res) {
     res.render('index',{
-        isAuthenticated : false,
-        user : null
+        isAuthenticated : req.isAuthenticated(),
+        user : req.user
     });
 });
 
-app.get('/login',function(res,res) {
+app.get('/login', function(req, res) {
     res.render('login');
+});
+
+app.post('/login', passport.authenticate('local') , function(req, res){
+    res.redirect('/');
+});
+
+app.get('/logout',function (req, res) {
+   req.logout(); 
+
+   res.redirect('/');
 });
 
 var port = process.env.PORT || 1337;

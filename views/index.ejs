@@ -8,7 +8,9 @@
    <% if(!isAuthenticated) {%>
         <a href="/login">Login here</a>
     <% } else {%>
-    <p>Hello <%= user.name %></p>
+    <p> Hello <%= user.name %>
+        <a href="/logout">Log out</a>
+    </p>
    <% } %>
 </body>
 </html>
