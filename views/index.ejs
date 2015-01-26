@@ -4,6 +4,11 @@
     <title>Express Example</title>
 </head>
 <body>
-   <p>This a Home page</p> 
+   <p>This a Home page</p>
+   <% if(!isAuthenticated) {%>
+        <a href="/login">Login here</a>
+    <% } else {%>
+    <p>Hello <%= user.name %></p>
+   <% } %>
 </body>
 </html>
