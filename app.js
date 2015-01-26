@@ -1,3 +1,6 @@
+var fs= require('fs');
+var https = require('https');
+
 var express = require('express');
 var passport = require('passport');
 var passportLocal = require('passport-local');
@@ -7,6 +10,11 @@ var cookieParser = require('cookie-parser');
 var expressSession = require('express-session');
 
 var app = express();
+
+var server = https.createServer({
+    cert : fs.readFileSync(__dirname+'/server.crt'),
+    key : fs.readFileSync(__dirname+'/server.key')
+}, app);
 
 app.set('view engine','ejs');
 
@@ -24,7 +32,6 @@ app.use(passport.session());
 function verifyCredentials (username, password, done) {
     //i'm just hard coding authentification. 
 //In a real world scenario, you would talk to a db
-
     if ( username === password ) {
         done(null, {id : username, name : username });
     }else {
@@ -90,6 +97,6 @@ app.get('/api/data', ensureAutenticated, function(req, res) {
 
 var port = process.env.PORT || 1337;
 
-app.listen(port, function () {
+server.listen(port, function () {
     console.log('Started node server at http://127.0.0.1:'+port); 
 });
